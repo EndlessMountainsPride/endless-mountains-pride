@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#17322B" />
+  <meta name="description" content="Official festival guide for Endless Mountains Pride at Mountaineer Park — explore vendors, nonprofits, live event schedule, interactive grounds map, personal schedule, and 10-minute event reminders." />
+  <title>Endless Mountains Pride — Festival Guide</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" href="./assets/icon-192.png" />
+  <link rel="apple-touch-icon" href="./assets/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <!-- Signature Endless Mountains Pride Ribbon -->
+  <div class="pride-ribbon" aria-hidden="true"></div>
+
+  <!-- In-App 10-Minute Reminder Alert Banner -->
+  <div id="reminder-banner" class="reminder-banner hidden" role="alert" aria-live="assertive">
+    <div class="reminder-banner-inner">
+      <div class="reminder-banner-icon" aria-hidden="true">🔔</div>
+      <div class="reminder-banner-text">
+        <strong id="reminder-banner-title">Starting in 10 minutes</strong>
+        <p id="reminder-banner-body"></p>
+      </div>
+      <div class="reminder-banner-actions">
+        <button id="reminder-banner-map" class="btn btn-sm btn-light" type="button">View on Map</button>
+        <button id="reminder-banner-close" class="btn-icon-close" type="button" aria-label="Dismiss reminder">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="#schedule" class="brand" id="brand-home" aria-label="Endless Mountains Pride Home">
+        <img src="./assets/logo.png" alt="Endless Mountains Pride logo" class="brand-logo" />
+        <div class="brand-text">
+          <h1 id="header-festival-name">Endless Mountains Pride</h1>
+          <p id="header-festival-meta">Mountaineer Park · Loading details…</p>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="desktop-nav" aria-label="Primary navigation">
+        <button class="nav-tab active" data-tab="schedule" id="desk-tab-schedule" type="button">
+          <span class="nav-icon" aria-hidden="true">📅</span>
+          <span>Schedule</span>
+        </button>
+        <button class="nav-tab" data-tab="vendors" id="desk-tab-vendors" type="button">
+          <span class="nav-icon" aria-hidden="true">🛍️</span>
+          <span>Vendors &amp; Tables</span>
+        </button>
+        <button class="nav-tab" data-tab="map" id="desk-tab-map" type="button">
+          <span class="nav-icon" aria-hidden="true">🗺️</span>
+          <span>Grounds Map</span>
+        </button>
+        <button class="nav-tab" data-tab="my-pride" id="desk-tab-my-pride" type="button">
+          <span class="nav-icon" aria-hidden="true">❤️</span>
+          <span>My Schedule</span>
+          <span class="nav-badge hidden" id="desk-saved-count">0</span>
+        </button>
+      </nav>
+
+      <!-- Header Utility Actions -->
+      <div class="header-actions">
+        <button id="btn-sync-sheet" class="btn-utility" type="button" title="Refresh festival data from Google Sheet" aria-label="Refresh festival data">
+          <span class="sync-dot" id="sync-status-dot"></span>
+          <span class="btn-utility-label" id="sync-status-label">Sync</span>
+        </button>
+        <button id="btn-open-info" class="btn-utility" type="button" title="Festival Info &amp; Google Sheet Settings" aria-label="Festival info and settings">
+          <span aria-hidden="true">ℹ️</span>
+          <span class="btn-utility-label">Info</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="app-main">
+    <!-- Live Announcement Banner (controlled from Festival Info tab in Google Sheet) -->
+    <section id="announcement-bar" class="announcement-bar hidden" aria-label="Festival announcement">
+      <div class="announcement-inner">
+        <span class="announcement-tag">Festival Update</span>
+        <p id="announcement-text"></p>
+      </div>
+    </section>
+
+    <!-- ===================== TAB 1: SCHEDULE ===================== -->
+    <section id="panel-schedule" class="tab-panel active" aria-labelledby="schedule-heading">
+      <div class="section-header">
+        <div>
+          <h2 id="schedule-heading">Festival Schedule</h2>
+          <p class="section-subtitle" id="schedule-subtitle">Tap any event to add it to your personal schedule and get a 10-minute reminder.</p>
+        </div>
+        <div class="quick-reminder-pill">
+          <button id="btn-quick-notify" class="btn btn-outline btn-sm" type="button">
+            <span id="quick-notify-icon">🔔</span>
+            <span id="quick-notify-text">Enable 10-Min Alerts</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-box">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input type="search" id="schedule-search" placeholder="Search performances, hosts, locations…" aria-label="Search schedule" />
+        </div>
+        <div class="filter-chips" id="schedule-category-chips" role="group" aria-label="Filter events by category"></div>
+      </div>
+
+      <div id="schedule-list" class="schedule-timeline" aria-live="polite"></div>
+    </section>
+
+    <!-- ===================== TAB 2: VENDORS & NONPROFITS ===================== -->
+    <section id="panel-vendors" class="tab-panel" aria-labelledby="vendors-heading">
+      <div class="section-header">
+        <div>
+          <h2 id="vendors-heading">Vendors &amp; Nonprofit Tables</h2>
+          <p class="section-subtitle">Explore local makers, community nonprofits, food trucks, and festival stations.</p>
+        </div>
+        <div class="vendor-count-chip" id="vendor-count-chip">0 booths</div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="segmented-control" id="vendor-type-segment" role="group" aria-label="Filter by table type">
+          <button class="seg-btn active" data-type="All" type="button">All</button>
+          <button class="seg-btn" data-type="Vendor" type="button">Vendors</button>
+          <button class="seg-btn" data-type="Nonprofit" type="button">Nonprofits</button>
+          <button class="seg-btn" data-type="Food & Drink" type="button">Food &amp; Drink</button>
+        </div>
+        <div class="search-box">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input type="search" id="vendor-search" placeholder="Search by name, booth # (e.g. Booth 6), or craft…" aria-label="Search vendors and nonprofits" />
+        </div>
+        <div class="filter-chips" id="vendor-category-chips" role="group" aria-label="Filter vendors by category"></div>
+      </div>
+
+      <div id="vendors-grid" class="vendors-grid" aria-live="polite"></div>
+    </section>
+
+    <!-- ===================== TAB 3: INTERACTIVE GROUNDS MAP ===================== -->
+    <section id="panel-map" class="tab-panel" aria-labelledby="map-heading">
+      <div class="section-header">
+        <div>
+          <h2 id="map-heading">Interactive Festival Grounds Map</h2>
+          <p class="section-subtitle" id="map-subtitle">Tap any numbered booth, stage, canopy, or amenity to see who is there. Pinch or use controls to zoom.</p>
+        </div>
+        <div class="map-header-actions">
+          <button id="btn-ref-map" class="btn btn-outline btn-sm" type="button">View 2026 Reference Map</button>
+        </div>
+      </div>
+
+      <div class="map-filters" id="map-layer-filters" role="group" aria-label="Highlight map layers">
+        <button class="chip active" data-layer="all" type="button">All Areas</button>
+        <button class="chip" data-layer="vendors" type="button">🛍️ Vendors &amp; Booths</button>
+        <button class="chip" data-layer="food" type="button">🍔 Food &amp; Drinks</button>
+        <button class="chip" data-layer="events" type="button">🎭 Stage &amp; Activities</button>
+        <button class="chip" data-layer="amenities" type="button">🏥 Restrooms &amp; Access</button>
+        <button class="chip" data-layer="favorites" type="button">❤️ My Favorites</button>
+      </div>
+
+      <div class="map-workspace">
+        <div class="map-stage-card">
+          <div class="map-controls" aria-label="Map zoom controls">
+            <button id="map-zoom-in" class="map-ctrl-btn" type="button" title="Zoom in" aria-label="Zoom in">+</button>
+            <button id="map-zoom-out" class="map-ctrl-btn" type="button" title="Zoom out" aria-label="Zoom out">−</button>
+            <button id="map-zoom-reset" class="map-ctrl-btn" type="button" title="Reset view" aria-label="Reset map view">⟲</button>
+          </div>
+          <div class="map-viewport" id="map-viewport" aria-label="Interactive Mountaineer Park festival map">
+            <div class="map-canvas" id="map-canvas">
+              <!-- Interactive SVG injected by app.js -->
+            </div>
+          </div>
+          <div class="map-legend" aria-label="Map key">
+            <span class="legend-item"><i class="swatch swatch-stage"></i>Stage</span>
+            <span class="legend-item"><i class="swatch swatch-booth"></i>Vendor Booths 1–17</span>
+            <span class="legend-item"><i class="swatch swatch-canopy"></i>Canopies &amp; Info</span>
+            <span class="legend-item"><i class="swatch swatch-food"></i>Food &amp; BBQ</span>
+            <span class="legend-item"><i class="swatch swatch-restroom"></i>Restrooms</span>
+            <span class="legend-item"><i class="swatch swatch-firstaid"></i>EMS / First Aid</span>
+            <span class="legend-item"><i class="swatch swatch-access"></i>Accessible</span>
+            <span class="legend-item"><i class="swatch swatch-fav"></i>Your Favorites</span>
+          </div>
+        </div>
+
+        <!-- Location Detail Drawer / Side Panel -->
+        <aside class="map-inspector" id="map-inspector" aria-live="polite">
+          <div class="inspector-placeholder" id="inspector-content">
+            <div class="inspector-empty">
+              <span class="inspector-empty-icon" aria-hidden="true">📍</span>
+              <h3>Select a Booth or Zone</h3>
+              <p>Tap any numbered vendor booth (1–17), the Main Stage, Food Court, Quiet Corner Canopy, or an amenity icon on the map to view details.</p>
+              <div class="quick-jump-list">
+                <button class="chip" data-jump="Main Stage" type="button">🎭 Main Stage</button>
+                <button class="chip" data-jump="emPRIDE & Drinks" type="button">🏳️‍🌈 emPRIDE &amp; Drinks</button>
+                <button class="chip" data-jump="Quiet Corner Canopy" type="button">🫧 Quiet Corner</button>
+                <button class="chip" data-jump="Food Court Area" type="button">🍕 Food Court</button>
+                <button class="chip" data-jump="Main Entrance" type="button">🚪 Main Entrance</button>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ===================== TAB 4: MY SCHEDULE & FAVORITES ===================== -->
+    <section id="panel-my-pride" class="tab-panel" aria-labelledby="my-pride-heading">
+      <div class="section-header">
+        <div>
+          <h2 id="my-pride-heading">My Personal Pride Plan</h2>
+          <p class="section-subtitle">Your saved events, 10-minute notifications, and favorite booths — stored right on your device.</p>
+        </div>
+      </div>
+
+      <!-- Notification & Calendar Control Card -->
+      <section class="reminder-control-card" aria-label="10-minute event notification settings">
+        <div class="reminder-control-main">
+          <div class="reminder-control-copy">
+            <h3>🔔 10-Minute Event Reminders</h3>
+            <p id="notify-status-copy">Opt in to receive an alert 10 minutes before each event on your personal schedule begins.</p>
+          </div>
+          <label class="toggle-switch" for="toggle-global-reminders">
+            <input type="checkbox" id="toggle-global-reminders" />
+            <span class="toggle-track"></span>
+            <span class="toggle-label" id="toggle-global-label">Off</span>
+          </label>
+        </div>
+
+        <div class="reminder-control-actions">
+          <button id="btn-test-notification" class="btn btn-outline btn-sm" type="button">Test 10-Min Alert Now</button>
+          <button id="btn-export-ics" class="btn btn-primary btn-sm" type="button">📲 Add My Schedule to Phone Calendar (.ics)</button>
+        </div>
+        <p class="reminder-footnote">
+          Tip: Browser alerts work whenever this app is open (or installed to your Home Screen). Exporting <code>.ics</code> adds built-in <strong>10-minute phone calendar alarms</strong> that notify you even with your screen locked and browser closed.
+        </p>
+      </section>
+
+      <div class="my-pride-columns">
+        <!-- Personal Schedule Column -->
+        <section class="my-section" aria-labelledby="my-events-heading">
+          <div class="my-section-head">
+            <h3 id="my-events-heading">My Events (<span id="my-events-count">0</span>)</h3>
+            <button id="btn-browse-schedule" class="link-btn" type="button">Browse All →</button>
+          </div>
+          <div id="my-schedule-list" class="my-list"></div>
+        </section>
+
+        <!-- Favorite Vendors Column -->
+        <section class="my-section" aria-labelledby="my-vendors-heading">
+          <div class="my-section-head">
+            <h3 id="my-vendors-heading">Favorite Vendors &amp; Tables (<span id="my-vendors-count">0</span>)</h3>
+            <button id="btn-browse-vendors" class="link-btn" type="button">Browse All →</button>
+          </div>
+          <div id="my-vendors-list" class="my-list"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <button class="mobile-nav-btn active" data-tab="schedule" id="mob-tab-schedule" type="button">
+      <span class="mobile-nav-icon" aria-hidden="true">📅</span>
+      <span>Schedule</span>
+    </button>
+    <button class="mobile-nav-btn" data-tab="vendors" id="mob-tab-vendors" type="button">
+      <span class="mobile-nav-icon" aria-hidden="true">🛍️</span>
+      <span>Vendors</span>
+    </button>
+    <button class="mobile-nav-btn" data-tab="map" id="mob-tab-map" type="button">
+      <span class="mobile-nav-icon" aria-hidden="true">🗺️</span>
+      <span>Map</span>
+    </button>
+    <button class="mobile-nav-btn" data-tab="my-pride" id="mob-tab-my-pride" type="button">
+      <span class="mobile-nav-icon" aria-hidden="true">❤️</span>
+      <span>My Plan</span>
+      <span class="nav-badge hidden" id="mob-saved-count">0</span>
+    </button>
+  </nav>
+
+  <!-- Festival Info & Google Sheet Settings Modal -->
+  <div id="info-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="info-modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="info-modal-title">Festival Info &amp; Live Sheet Sync</h2>
+        <button id="btn-close-info" class="btn-icon-close" type="button" aria-label="Close modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="info-block">
+          <h3>Park &amp; Visitor Information</h3>
+          <dl class="info-dl" id="festival-info-dl"></dl>
+        </div>
+
+        <div class="info-block sheet-sync-block">
+          <h3>Google Sheet Data Source</h3>
+          <p class="sheet-status-line" id="modal-sync-status">Checking connection…</p>
+          <label class="field-label" for="sheet-id-input">Google Sheet URL or ID</label>
+          <div class="sheet-input-row">
+            <input type="text" id="sheet-id-input" placeholder="Paste Google Sheets URL or Spreadsheet ID" />
+            <button id="btn-save-sheet" class="btn btn-primary btn-sm" type="button">Connect &amp; Sync</button>
+          </div>
+          <div class="sheet-helper-actions">
+            <a id="link-open-sheet" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">Open Google Sheet ↗</a>
+            <button id="btn-reset-sheet" class="link-btn" type="button">Reset to Default Sheet</button>
+          </div>
+          <div class="sheet-setup-tip">
+            <strong>For organizers:</strong> To let attendees' browsers pull live edits automatically, open the Google Sheet and click <em>Share → General access → Anyone with the link (Viewer)</em>. Changes you make to the <code>Vendors</code>, <code>Schedule</code>, or <code>Festival Info</code> tabs will appear in the app on next refresh.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2026 Reference Map Modal -->
+  <div id="ref-map-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="ref-map-title">
+    <div class="modal-card modal-card-wide">
+      <div class="modal-header">
+        <h2 id="ref-map-title">Last Year's Grounds Layout Reference</h2>
+        <button id="btn-close-ref-map" class="btn-icon-close" type="button" aria-label="Close reference map">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="ref-map-note">Original festival grounds diagram used as the blueprint for the interactive map.</p>
+        <img src="./assets/reference-map-2026.png" alt="Last year Endless Mountains Pride festival grounds map" class="ref-map-img" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Subtle Toast Notification -->
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

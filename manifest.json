@@ -1,0 +1,21 @@
+{
+  "name": "Endless Mountains Pride Festival Guide",
+  "short_name": "EM Pride",
+  "description": "Vendors, schedule, interactive grounds map, personal schedule, and 10-minute event reminders for Endless Mountains Pride.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FAF8F3",
+  "theme_color": "#17322B",
+  "icons": [
+    {
+      "src": "./assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
